@@ -1,0 +1,28 @@
+    }).catch(function(){}).
+    then(function(){
+      linksTo("smart-links",[
+        ["Shodan", "https://www.shodan.io/search?query="+encodeURIComponent(raw)],
+        ["Censys", "https://search.censys.io/search?resource=hosts&q="+encodeURIComponent(raw)],
+        ["AbuseIPDB", "https://www.abuseipdb.com/check/"+encodeURIComponent(raw)]
+      ]);
+    });
+  }else if(type==="domain"){
+    var dom=cleanDomain(raw);
+    outShow("smart-out","Тип: ДОМЕН: "+dom+"\n\n⏳ DNS ...");
+    var TYPES=["A","AAAA","MX","NS","SOA","TXT"];
+    Promise.all(TYPES.map(function(t){
+      return doh(dom,t).then(function(j){
+        var arr=(j&&j.Answer)? j.Answer: [];
+        var n=arr.length;
+        return kv(t,String(n))+((n>0&&n<6)?"\n"+ansList(arr):"")+"\n";
+      }).catch(function(){ return kv(t,"—")+"\n"; });
+    })).then(function(parts){
+      outShow("smart-out","Тип: ДОМЕН: "+dom+"\n\n"+parts.join("\n"));
+    }).catch(function(){});
+    linksTo("smart-links",[
+      ["crt.sh", "https://crt.sh/?q="+encodeURIComponent(dom)],
+      ["Wayback", "https://web.archive.org/web/*/"+dom],
+      ["RDAP WHOIS", "https://rdap.org/domain/"+encodeURIComponent(dom)],
+      ["urlscan", "https://urlscan.io/search/#"+encodeURIComponent(dom)]
+    ]);
+  }else if(type==="username"){
