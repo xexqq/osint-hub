@@ -5,61 +5,102 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>OSINT Console</title>
 <style>
-:root{--bg:#0a0e12;--card:#131c25;--line:#1e2c38;--txt:#c8d6e0;--dim:#5f7887;--grn:#00e676;--cyan:#4dd0e1;--org:#ff9d00;--red:#ff5252}
+:root{--bg:#0a0e12;--card:#131c25;--line:#1e2c38;--txt:#c8d6e0;--dim:#5f7887;--grn:#00e676;--cyan:#4dd0e1;--org:#ff9d00;--red:#ff5252;--sel:#0e1620}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;padding-bottom:60px}
-header{text-align:center;padding:16px 10px 8px}
-h1{font-size:22px;color:var(--grn);letter-spacing:4px;text-shadow:0 0 14px rgba(0,230,118,.4)}
-.sub{color:var(--dim);font-size:11px;letter-spacing:1.5px}
-.tabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:10px}
-.tabs button{background:transparent;border:1px solid var(--line);color:var(--txt);padding:9px 14px;border-radius:8px;font-size:13px}
-.tabs button.on{background:var(--grn);color:#071108;border-color:var(--grn);font-weight:700}
-.pane{display:none;max-width:760px;margin:0 auto;padding:0 12px}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif}
+body.light{--bg:#f4f7f9;--card:#ffffff;--line:#d5dfe8;--txt:#1c2b36;--dim:#5c6b78;--grn:#0a8f4a;--cyan:#0a7c8f;--org:#b06d00;--red:#d3352b;--sel:#eef4f8}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+h1{font-size:17px;color:var(--grn);letter-spacing:3px}
+.dot{font-size:10px;color:var(--dim)}
+.dot.ok{color:var(--grn)} .dot.fail{color:var(--red)}
+.pill{font-size:10px;padding:2px 8px;border-radius:12px;background:var(--sel);color:var(--dim)}
+.sub{color:var(--dim);font-size:10.5px;letter-spacing:1px}
+.tabs{display:flex;gap:5px;padding:9px 8px 2px;flex-wrap:wrap;justify-content:center}
+.tabs button{background:transparent;border:1px solid var(--line);color:var(--txt);padding:8px 12px;border-radius:9px;font-size:12.5px}
+.tabs button.on{background:var(--grn);border-color:var(--grn);font-weight:700}
+body.light .tabs button.on{color:#fff}
+.pane{display:none;max-width:780px;margin:0 auto;padding:6px 12px 30px}
 .pane.on{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
-label{display:block;color:var(--cyan);font-size:11.5px;letter-spacing:1px;margin:10px 0 6px;text-transform:uppercase}
-input[type=text]{width:100%;background:#0b1117;border:1px solid var(--line);color:var(--grn);padding:11px 12px;border-radius:8px;font-size:14px;font-family:Consolas,monospace}
-input:focus{outline:none;border-color:var(--grn)}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-button{cursor:pointer;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;color:#071108;background:var(--grn)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:12px}
+label{display:block;color:var(--cyan);font-size:11px;letter-spacing:1px;margin:9px 0 5px;text-transform:uppercase}
+input[type=text],textarea,select{width:100%;background:var(--sel);border:1px solid var(--line);color:inherit;padding:11px 12px;border-radius:8px;font-size:14px;font-family:Consolas,monospace}
+input:focus,textarea:focus{outline:none;border-color:var(--grn)}
+select{color:var(--txt)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;align-items:center}
+button{cursor:pointer;border:none;border-radius:8px;padding:10px 15px;font-size:13px;font-weight:600;color:#071108;background:var(--grn)}
+body.light button{color:#fff}
 button.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
 button.ghost:hover{border-color:var(--grn);color:var(--grn)}
-.out{display:none;margin-top:12px;background:#0b1117;border:1px solid var(--line);border-radius:10px;padding:12px;font-family:Consolas,monospace;font-size:12.5px;line-height:1.65;white-space:pre-wrap;word-break:break-all;color:var(--grn)}
-.out .k{color:var(--cyan)}
-.out .warn{color:var(--org)}
-.out .bad{color:var(--red)}
-.hint{color:var(--dim);font-size:11px;margin-top:8px;line-height:1.5}
+.out{display:none;margin-top:11px;background:var(--sel);border:1px solid var(--line);border-radius:10px;padding:12px;font-family:Consolas,monospace;font-size:12.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+.out .k{color:var(--cyan)} .out .warn{color:var(--org)} .out .bad{color:var(--red)} .out .good{color:var(--grn)}
 a{color:var(--cyan)}
-.dorks{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.dorks a{display:inline-block;background:var(--card);border:1px solid var(--line);color:var(--txt);text-decoration:none;font-size:12px;padding:8px 12px;border-radius:8px}
+.plinks{display:none;margin-top:9px}
+.plinks a{display:inline-block;background:var(--sel);border:1px solid var(--line);color:var(--txt);text-decoration:none;font-size:12px;padding:7px 11px;border-radius:8px;margin:3px 3px 0 0}
+.plinks a:hover{border-color:var(--grn)}
+.plinks a:hover{border-color:var(--grn);color:var(--grn)}
+.hint{color:var(--dim);font-size:11px;margin-top:8px;line-height:1.5}
+.setline{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.setline:last-of-type{border-bottom:none}
+.setline .nm{font-size:13px}
+.setline .ds{font-size:10.5px;color:var(--dim);margin-top:2px}
+.setline select{width:180px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chips a{display:inline-block;background:var(--sel);border:1px solid var(--line);color:var(--txt);text-decoration:none;font-size:12px;padding:7px 11px;border-radius:8px;cursor:pointer}
+.chips a.on{border-color:var(--grn);color:var(--grn);background:rgba(0,230,118,.07)}
+.engrow{display:flex;gap:10px;flex-wrap:wrap}
+.engrow label{display:flex;align-items:center;gap:5px;margin:0;font-size:12px;text-transform:none;letter-spacing:0;color:var(--txt)}
+.engrow input{width:auto}
 </style>
 </head>
 <body>
 <header>
-  <h1>OSINT<span style="color:var(--txt)">::</span>CONSOLE</h1>
-  <div class="sub">Реальные API-запросы с телефона • без серверов • без трекинга</div>
+  <div>
+    <h1>OSINT<span style="color:var(--txt)">::</span>CONSOLE <span class="dot" id="dot"></span></h1>
+    <div class="sub">Реальные запросы с устройства • без серверов • v1.1</div>
+  </div>
+  <span class="pill" id="verpill">v1.1</span>
 </header>
 
-<div class="tabs">
-  <button class="on" data-pane="ip">IP-интел</button>
-  <button data-pane="dns">Домен / DNS</button>
-  <button data-pane="nick">Email / Ник</button>
-  <button data-pane="phone">Телефон</button>
-  <button data-pane="photo">Фото EXIF</button>
-  <button data-pane="dork">Dork'и</button>
+<div class="tabs" id="tabsbar">
+  <button class="on" data-pane="search">🚀 Поиск</button>
+  <button data-pane="ip">🌐 IP</button>
+  <button data-pane="dns">🧭 Домен</button>
+  <button data-pane="email">✉ Email</button>
+  <button data-pane="phone">📱 Телефон</button>
+  <button data-pane="nick">🧑 Ник</button>
+  <button data-pane="photo">📷 Фото</button>
+  <button data-pane="dork">🎯 Dork</button>
+  <button data-pane="hist">🕒 История</button>
+  <button data-pane="set">⚙ Настройки</button>
 </div>
 
-<section class="pane on" id="pane-ip">
+<section class="pane on" id="pane-search">
   <div class="card">
-    <label>IP-адрес (пусто = твой IP)</label>
+    <label>Умный поиск (любой вход)</label>
+    <input type="text" id="ibq" placeholder="email / +79001234567 / 1.1.1.1 / corp.ru / nikita93 / Иван Петров">
+    <div class="row">
+      <button id="smart-go">Определить и запустить всё</button>
+      <button class="ghost" id="smart-copy">Скопировать результаты</button>
+    </div>
+    <div class="out" id="smart-out"></div>
+    <div class="plinks" id="smart-links"></div>
+    <div class="hint">Автоопределение: email, телефон, IP (v4/v6), домен/URL, ник, имя — запускает все релевантные проверки, накопленные здесь, и открывает лучшие внешние сервисы.</div>
+  </div>
+</section>
+
+<section class="pane" id="pane-ip">
+  <div class="card">
+    <label>IP-адрес (пусто = ваш собственный IP)</label>
     <input type="text" id="ip-q" placeholder="1.1.1.1">
     <div class="row">
-      <button id="ip-go">Проверить IP</button>
+      <button id="ip-go">Полный разбор</button>
       <button class="ghost" id="ip-shodan">Shodan</button>
+      <button class="ghost" id="ip-censys">Censys</button>
       <button class="ghost" id="ip-abuse">AbuseIPDB</button>
+      <button class="ghost" id="ip-map">Карта OSM</button>
     </div>
     <div class="out" id="ip-out"></div>
-    <div class="hint">API: ipwho.is — страна, город, координаты, ASN, провайдер. Кнопки открывают внешние сервисы.</div>
+    <div class="hint">ipwho.is (гео, ASN, провайдер) + PTR-запись (обратное имя хоста) через DoH.</div>
   </div>
 </section>
 
@@ -68,34 +109,29 @@ a{color:var(--cyan)}
     <label>Домен</label>
     <input type="text" id="dns-q" placeholder="example.com">
     <div class="row">
-      <button id="dns-go">Полный recon (A/AAAA/MX/TXT/NS/SOA)</button>
-      <button class="ghost" id="sub-go">Брутфорс поддоменов</button>
+      <button id="dns-go">Все записи DNS</button>
+      <button id="sub-go">Брутфорс поддоменов</button>
+      <button class="ghost" id="dns-whois">RDAP WHOIS</button>
+      <button class="ghost" id="dns-crt">crt.sh</button>
+      <button class="ghost" id="dns-arch">Wayback</button>
+      <button class="ghost" id="dns-scan">urlscan</button>
     </div>
     <div class="out" id="dns-out"></div>
-    <div class="hint">Реальные resolve через DNS-over-HTTPS (dns.google). Брутфорс проверяет ~80 типовых префиксов: dev, vpn, mail, api, git, jira...</div>
+    <div class="hint">Резолвы через dns.google (DoH). Список поддоменов настраивается в разделе «Настройки».</div>
   </div>
 </section>
 
-<section class="pane" id="pane-nick">
+<section class="pane" id="pane-email">
   <div class="card">
     <label>Email</label>
     <input type="text" id="em-q" placeholder="user@example.com">
     <div class="row">
       <button id="em-go">Разбор + MX</button>
-      <button class="ghost" id="em-hibp">Утечки (HIBP)</button>
       <button class="ghost" id="em-grav">Gravatar</button>
+      <button class="ghost" id="em-hibp">HIBP (утечки)</button>
+      <button class="ghost" id="em-ix">Intelligence X</button>
     </div>
     <div class="out" id="em-out"></div>
-  </div>
-  <div class="card">
-    <label>Никнейм / GitHub</label>
-    <input type="text" id="gh-q" placeholder="octocat">
-    <div class="row">
-      <button id="gh-go">GitHub-разведка (реальные данные)</button>
-      <button class="ghost" id="nick-web">WhatsMyName (600+ соцсетей)</button>
-    </div>
-    <div class="out" id="gh-out"></div>
-    <div class="hint">GitHub API: имя, email, локация, компания, репо, звёзды — всё честно через публичный API.</div>
   </div>
 </section>
 
@@ -104,29 +140,128 @@ a{color:var(--cyan)}
     <label>Номер телефона</label>
     <input type="text" id="ph-q" placeholder="+7 900 123-45-67">
     <div class="row">
-      <button id="ph-go">Разбор номера (оффлайн)</button>
-      <button class="ghost" id="ph-txt">Поиск по дампам (dork)</button>
+      <button id="ph-go">Разбор (оффлайн)</button>
+      <button class="ghost" id="ph-dork">Поиск по открытым дампам</button>
+      <button class="ghost" id="ph-true">Truecaller</button>
     </div>
     <div class="out" id="ph-out"></div>
-    <div class="hint">Разбор: страна, тип линии (моб/фикс), формат E.164 — полностью оффлайн (libphonenumber).</div>
+    <div class="hint">libphonenumber: валидность, страна (флаг), оператор-префикс, тип линии, E.164. Страна по умолчанию задаётся в настройках.</div>
+  </div>
+</section>
+
+<section class="pane" id="pane-nick">
+  <div class="card">
+    <label>Никнейм / username</label>
+    <input type="text" id="gh-q" placeholder="octocat">
+    <div class="row">
+      <button id="gh-go">GitHub-разведка</button>
+      <button class="ghost" id="nick-l">Профили на 20 платформах</button>
+      <button class="ghost" id="nick-web">WhatsMyName (600+)</button>
+    </div>
+    <div class="out" id="gh-out"></div>
+    <div class="plinks" id="nick-links"></div>
   </div>
 </section>
 
 <section class="pane" id="pane-photo">
   <div class="card">
-    <label>Фото из галереи (не загружается на сервер)</label>
+    <label>Фото из галереи (анализ локальный, файл не уходит)</label>
     <input type="file" id="ph-file" accept="image/*" style="color:var(--dim)">
     <div class="out" id="photo-out"></div>
-    <div class="hint">EXIF-чтение в приложении (exifr): камера, дата, ISO, GPS-координаты с переходом на карту.</div>
+    <div class="hint">exifr читает: камера, дата, ISO, диафрагма, фокус, GPS. При наличии GPS — прямые ссылки на Google Maps / OSM / Яндекс.Карты (спутник).</div>
   </div>
 </section>
 
 <section class="pane" id="pane-dork">
   <div class="card">
-    <label>Мастер-запрос</label>
-    <input type="text" id="dk-q" placeholder="имя / email / телефон / ник">
-    <div class="dorks" id="dorkbox"></div>
-    <div class="hint">Кнопки строят готовые Google-запросы: Telegram, VK, соцсети, дампы, документы.</div>
+    <label>Опорный запрос</label>
+    <input type="text" id="dk-q" placeholder="иван петров / +79001234567 / user@mail.ru">
+    <label>Модификаторы (нажимайте — добавляют/убирают)</label>
+    <div class="chips" id="dorchips">
+      <a class="ch" data-add="site:t.me">Telegram</a>
+      <a class="ch" data-add="site:vk.com">VK</a>
+      <a class="ch" data-add="site:ok.ru">OK</a>
+      <a class="ch" data-add="site:instagram.com">Instagram</a>
+      <a class="ch" data-add="site:x.com OR site:twitter.com">X/Twitter</a>
+      <a class="ch" data-add="site:linkedin.com">LinkedIn</a>
+      <a class="ch" data-add="site:pastebin.com">Pastebin</a>
+      <a class="ch" data-add="site:github.com">GitHub</a>
+      <a class="ch" data-add="filetype:pdf">PDF</a>
+      <a class="ch" data-add="filetype:csv OR filetype:xlsx OR filetype:xls">XLS/CSV</a>
+      <a class="ch" data-add="filetype:txt">TXT</a>
+      <a class="ch" data-add="filetype:doc OR filetype:docx">DOC</a>
+      <a class="ch" data-add="intitle:&quot;index of&quot;">Открытые папки</a>
+      <a class="ch" data-add="inurl:dump">Слово dump в URL</a>
+    </div>
+    <label>Итоговый dork</label>
+    <textarea id="dk-txt" rows="2" placeholder='"запрос" site:t.me'></textarea>
+    <div class="row">
+      <select id="dk-engine" style="width:150px">
+        <option value="google">Google</option>
+        <option value="yandex">Яндекс</option>
+        <option value="bing">Bing</option>
+        <option value="ddg">DuckDuckGo</option>
+      </select>
+      <button id="dk-go">Открыть в поисковике</button>
+      <button class="ghost" id="dk-copy">Копировать</button>
+    </div>
+  </div>
+</section>
+
+<section class="pane" id="pane-hist">
+  <div class="card">
+    <label>История запросов (хранится локально)</label>
+    <div class="row" style="margin-bottom:8px">
+      <button class="ghost" id="hist-export">Скопировать всё</button>
+      <button class="ghost" id="hist-clear">Очистить</button>
+    </div>
+    <div class="out" id="hist-out"></div>
+    <div class="hint">Записывается каждый запуск Умного поиска (последние 50). Ничего не отправляется наружу.</div>
+  </div>
+</section>
+
+<section class="pane" id="pane-set">
+  <div class="card">
+    <label>Настройки приложения</label>
+    <div class="setline">
+      <div><div class="nm">Тема</div><div class="ds">Тёмная / светлая</div></div>
+      <select id="s-theme"><option value="dark">Тёмная</option><option value="light">Светлая</option></select>
+    </div>
+    <div class="setline">
+      <div><div class="nm">Страна по умолчанию</div><div class="ds">для телефонов без «+» и Truecaller</div></div>
+      <select id="s-country">
+        <option value="RU">RU</option><option value="UA">UA</option><option value="KZ">KZ</option>
+        <option value="BY">BY</option><option value="US">US</option><option value="GB">GB</option>
+        <option value="DE">DE</option><option value="IN">IN</option>
+      </select>
+    </div>
+    <div class="setline">
+      <div><div class="nm">Список поддоменов</div><div class="ds">быстрый ~25 / стандарт ~110 / полный ~230</div></div>
+      <select id="s-subdepth"><option value="fast">Быстрый</option><option value="std">Стандарт</option><option value="full">Полный</option></select>
+    </div>
+    <div class="setline">
+      <div><div class="nm">Пауза между открытиями</div><div class="ds">мс — помогает, если окна блокируются</div></div>
+      <select id="s-delay"><option value="0">0</option><option value="250">250</option><option value="500">500</option><option value="900">900</option></select>
+    </div>
+    <div class="setline">
+      <div><div class="nm">Вести историю</div><div class="ds">сохранять запросы на устройстве</div></div>
+      <select id="s-histlog"><option value="on">Вкл</option><option value="off">Выкл</option></select>
+    </div>
+    <div class="setline">
+      <div><div class="nm">Поисковики «Умного поиска»</div><div class="ds">какие движки открывать</div></div>
+      <div class="engrow">
+        <label><input type="checkbox" class="eng" value="google" checked>Google</label>
+        <label><input type="checkbox" class="eng" value="yandex">Яндекс</label>
+        <label><input type="checkbox" class="eng" value="bing">Bing</label>
+        <label><input type="checkbox" class="eng" value="ddg">DDG</label>
+      </div>
+    </div>
+    <label>Диагностика</label>
+    <div class="row">
+      <button id="diag-go">🧪 Проверить всё</button>
+      <button class="ghost" id="set-reset">Сброс настройки</button>
+    </div>
+    <div class="out" id="diag-out"></div>
   </div>
 </section>
 
@@ -136,232 +271,6 @@ a{color:var(--cyan)}
 <script>
 "use strict";
 function $(id){return document.getElementById(id);}
-function open(url){window.open(url,"_blank");}
-function show(id,html){var e=$(id);e.innerHTML=html;e.style.display="block";}
-function kv(k,v){return '<span class="k">'+k+'</span>: '+v;}
-
-/* TABS */
-document.querySelectorAll(".tabs button").forEach(function(b){
-  b.onclick=function(){
-    document.querySelectorAll(".tabs button").forEach(function(x){x.classList.remove("on");});
-    b.classList.add("on");
-    document.querySelectorAll(".pane").forEach(function(p){p.classList.remove("on");});
-    var p=$("pane-"+b.dataset.pane); if(p) p.classList.add("on");
-  };
-});
-
-/* ============ IP ============ */
-$("ip-go").onclick=function(){
-  var q=$("ip-q").value.trim();
-  var url=q?("https://ipwho.is/"+encodeURIComponent(q)):"https://ipwho.is/";
-  show("ip-out","⏳ запрос ipwho.is ...");
-  fetch(url).then(function(r){return r.json();}).then(function(d){
-    if(!d || d.success===false){show("ip-out",'<span class="bad">ошибка запроса</span>');return;}
-    var h=kv("IP",d.ip)+"\n";
-    h+=kv("Страна",(d.country||"—")+" ("+(d.country_code||"—")+")")+"\n";
-    h+=kv("Регион/город",(d.region||"—")+" / "+(d.city||"—"))+"\n";
-    h+=kv("Координаты",d.latitude+","+d.longitude)+"\n";
-    var c=d.connection||{};
-    h+=kv("Провайдер",c.isp||"—")+"\n";
-    h+=kv("ORG",(c.org||"—")+" AS"+(c.asn||"—"))+"\n";
-    h+=kv("Таймзона",((d.timezone||{}).id)||"—")+"\n";
-    show("ip-out",h);
-  }).catch(function(e){show("ip-out",' сетевая ошибка: '+e.message);});
-};
-$("ip-shodan").onclick=function(){open("https://www.shodan.io/search?query="+encodeURIComponent($("ip-q").value.trim()));};
-$("ip-abuse").onclick=function(){open("https://www.abuseipdb.com/check/"+encodeURIComponent($("ip-q").value.trim()));};
-
-/* ============ DNS / DOMAIN ============ */
-function doh(n,t){return fetch("https://dns.google/resolve?name="+encodeURIComponent(n)+"&type="+t).then(function(r){return r.json();});}
-function fmtAns(list){
-  return list.map(function(x){return "  "+(x.data||"");}).join("\n");
-}
-$("dns-go").onclick=function(){
-  var d=$("dns-q").value.trim().replace(/^https?:\/\//,"").split("/")[0];
-  if(!d){show("dns-out",'<span class="warn">введи домен</span>');return;}
-  show("dns-out","⏳ резолв "+d+" через DoH (dns.google)...");
-  var all="";
-  var types=["A","AAAA","MX","TXT","NS","SOA"];
-  Promise.all(types.map(function(t){
-    return doh(d,t).then(function(j){
-      if(j&&j.Answer&&j.Answer.length){
-        all+=kv(t,"("+j.Answer.length+" записей)")+"\n"+fmtAns(j.Answer)+"\n\n";
-      }else{
-        all+=kv(t,"")+'<span class="warn"> пусто</span>'+"\n\n";
-      }
-    }).catch(function(e){
-      all+=kv(t,"")+'<span class="bad"> ошибка</span>'+"\n\n";
-    });
-  })).then(function(){show("dns-out",all.trim());});
-};
-
-var SUB=["www","mail","webmail","smtp","pop","imap","ns1","ns2","mx","mx1","mx2","vpn","api","apis","app","apps","dev","develop","development","test","testing","stg","stage","staging","prod","beta","alpha","demo","git","gitlab","ci","jenkins","build","portal","admin","cpanel","backup","db","sql","mysql","pg","postgres","redis","cache","cdn","static","assets","img","images","media","files","download","dl","ftp","sftp","remote","desktop","cloud","s3","storage","k8s","docker","jira","confluence","monitor","grafana","kibana","elastic","log","logs","intra","internal","corp","office","wiki","docs","help","support","sso","auth","login","id","shop","store","pay","billing","crm","m","mobile","old","new"];
-
-$("sub-go").onclick=function(){
-  var d=$("dns-q").value.trim().replace(/^https?:\/\//,"").split("/")[0];
-  if(!d){show("dns-out",'<span class="warn">введи домен</span>');return;}
-  show("dns-out","⏳ брутфорс "+SUB.length+" поддоменов через реальный DNS...\nэто ~30-60 сек");
-  var chunks=[];
-  var found=0;
-  Promise.all(SUB.map(function(p){
-    return doh(p+"."+d,"A").then(function(j){
-      if(j&&j.Answer&&j.Answer.length){
-        var ip=j.Answer[0].data;
-        chunks.push(kv(p+"."+d,ip));
-        found++;
-      }
-    }).catch(function(){});
-  })).then(function(){
-    var h=kv("Найдено живых поддоменов",found+"/"+SUB.length)+"\n\n";
-    h+=(found>0?chunks.join("\n"):'<span class="warn">из типовых префиксов ничего не резолвится</span>');
-    show("dns-out",h);
-  });
-};
-
-/* ============ EMAIL ============ */
-$("em-go").onclick=function(){
-  var em=$("em-q").value.trim().toLowerCase();
-  if(!em){show("em-out",'<span class="warn">введи email</span>');return;}
-  var domain=(em.split("@")[1]||"");
-  var local=(em.split("@")[0]||"");
-  var h=kv("Локальная часть",'"'+local+'"')+"\n";
-  h+=kv("Домен",domain)+"\n";
-  var prov="собственный / корпоративный";
-  if(/gmail|googlemail/.test(domain)) prov="Google / Gmail";
-  else if(/yahoo/.test(domain)) prov="Yahoo";
-  else if(/outlook|hotmail|live/.test(domain)) prov="Microsoft";
-  else if(/mail\.ru|bk\.ru|inbox\.ru|list\.ru/.test(domain)) prov="Mail.ru (RU)";
-  else if(/yandex|ya\.ru/.test(domain)) prov="Яндекс (RU)";
-  else if(/proton/.test(domain)) prov="Proton — приватный";
-  h+=kv("Провайдер",prov)+"\n";
-  show("em-out",h);
-  doh(domain,"MX").then(function(j){
-    if(j&&j.Answer&&j.Answer.length){
-      var mx=j.Answer.map(function(x){
-        var p=x.data.split(/\s+/);
-        return p.length>1?p[1]:x.data;
-      }).join(", ");
-      $("em-out").innerHTML+=kv("MX-серверы",mx)+"\n";
-    }else{
-      $("em-out").innerHTML+='<span class="warn">MX: нет — домен без почты</span>'+"\n";
-    }
-  }).catch(function(){});
-};
-$("em-hibp").onclick=function(){open("https://haveibeenpwned.com/account/"+encodeURIComponent($("em-q").value.trim()));};
-$("em-grav").onclick=function(){
-  var em=$("em-q").value.trim().toLowerCase();
-  if(typeof CryptoJS==="undefined"){show("em-out",'<span class="warn">CDN недоступен</span>');return;}
-  var hash=CryptoJS.MD5(em).toString();
-  open("https://gravatar.com/"+hash+".json");
-};
-
-/* ============ GITHUB / NICK ============ */
-$("gh-go").onclick=function(){
-  var u=$("gh-q").value.trim();
-  if(!u){show("gh-out",'<span class="warn">введи ник</span>');return;}
-  show("gh-out","⏳ GitHub API...");
-  Promise.all([
-    fetch("https://api.github.com/users/"+encodeURIComponent(u)).then(function(r){return r.json();}),
-    fetch("https://api.github.com/users/"+encodeURIComponent(u)+"/repos?per_page=5&sort=updated").then(function(r){return r.json();})
-  ]).then(function(rs){
-    var p=rs[0],repos=rs[1];
-    if(p.message){show("gh-out",'<span class="warn">'+u+': не найден ('+p.message+')</span>');return;}
-    var h=kv("Ник",p.login)+" ("+(p.type||"User")+")\n";
-    if(p.name) h+=kv("Имя",p.name)+"\n";
-    if(p.email) h+=kv("EMAIL",p.email)+"\n";
-    if(p.company) h+=kv("Компания",p.company)+"\n";
-    if(p.location) h+=kv("Локация",p.location)+"\n";
-    if(p.blog) h+=kv("Сайт",p.blog)+"\n";
-    if(p.twitter_username) h+=kv("Twitter/X",p.twitter_username)+"\n";
-    h+=kv("Публичные репо/фолловеры",p.public_repos+" / "+p.followers)+"\n";
-    h+=kv("Аккаунт создан",(p.created_at||"—").split("T")[0])+"\n";
-    if(repos&&repos.length){
-      h+="\nПОСЛЕДНИЕ РЕПО:\n";
-      repos.forEach(function(r){
-        h+="  • "+r.name+" ("+(r.language||"—")+", ★"+r.stargazers_count+", "+(r.updated_at||"—").split("T")[0]+")\n";
-      });
-    }
-    show("gh-out",h);
-  }).catch(function(e){show("gh-out",' сетевая ошибка: '+e.message);});
-};
-$("nick-web").onclick=function(){open("https://whatsmyname.app/?q="+encodeURIComponent($("gh-q").value.trim()));};
-
-/* ============ PHONE ============ */
-$("ph-go").onclick=function(){
-  var raw=$("ph-q").value.trim();
-  if(!raw){show("ph-out",'<span class="warn">введи номер</span>');return;}
-  try{
-    if(typeof libphonenumber==="undefined"){show("ph-out",'<span class="warn">CDN недоступен</span>');return;}
-    var pn=libphonenumber.parsePhoneNumberFromString(raw);
-    if(!pn){show("ph-out",'<span class="warn">формат не распознан (попробуй +7...)</span>');return;}
-    var h=kv("Валидный",pn.isValid()?"ДА":"<span class='bad'>НЕТ</span>")+"\n";
-    h+=kv("Страна",pn.country||"—")+"\n";
-    h+=kv("E.164",pn.number)+"\n";
-    h+=kv("Формат",pn.formatInternational())+"\n";
-    h+=kv("Тип линии",String(pn.getType()||"—"))+"\n";
-    show("ph-out",h);
-  }catch(e){show("ph-out",' ошибка: '+e.message);}
-};
-$("ph-txt").onclick=function(){
-  var raw=$("ph-q").value.trim();
-  open("https://www.google.com/search?q="+encodeURIComponent('"'+raw+'" (site:t.me OR site:vk.com OR site:pastebin.com OR site:github.com OR filetype:txt)'));
-};
-
-/* ============ PHOTO EXIF ============ */
-$("ph-file").addEventListener("change",function(ev){
-  var f=ev.target.files[0];
-  if(!f)return;
-  show("photo-out","⏳ читаю EXIF локально...");
-  if(typeof exifr==="undefined"){show("photo-out",'<span class="warn">библиотека не загрузилась</span>');return;}
-  exifr.parse(f,{gps:true}).then(function(x){
-    if(!x||Object.keys(x).length===0){
-      show("photo-out",'<span class="warn">EXIF-данных нет (чистый/пересжатый файл)</span>');
-      return;
-    }
-    var h="";
-    if(x.Make||x.Model) h+=kv("Камера",(x.Make||"—")+" "+(x.Model||""))+"\n";
-    if(x.DateTimeOriginal) h+=kv("Дата съёмки",new Date(x.DateTimeOriginal).toLocaleString())+"\n";
-    if(x.software) h+=kv("Софт",x.software)+"\n";
-    if(x.ISO!==undefined) h+=kv("ISO",x.ISO)+"\n";
-    if(x.FNumber) h+=kv("Диафрагма","f/"+x.FNumber)+"\n";
-    if(x.GPSLatitude&&x.GPSLongitude){
-      h+=kv("GPS",x.GPSLatitude+", "+x.GPSLongitude)+"\n";
-      h+='   → <a target="_blank" rel="noopener" href="https://www.google.com/maps?q='+x.GPSLatitude+","+x.GPSLongitude+'">открыть на карте</a>\n';
-    }else{
-      h+='<span class="warn">GPS: нет данных</span>\n';
-    }
-    show("photo-out",h);
-  }).catch(function(e){show("photo-out",' ошибка разбора: '+e.message);});
-});
-
-/* ============ DORKS ============ */
-var DORKS=[
-  ["Telegram","site:t.me"],
-  ["VK","site:vk.com"],
-  ["Instagram","site:instagram.com"],
-  ["Twitter/X","site:x.com"],
-  ["LinkedIn","site:linkedin.com"],
-  ["Pastebin дампы","site:pastebin.com"],
-  ["GitHub","site:github.com"],
-  ["Документы PDF/DOC/XLS","filetype:pdf OR filetype:doc OR filetype:xls"],
-  ["Утекшие TXT","filetype:txt"],
-  ["Все соцсети сразу","site:vk.com OR site:t.me OR site:instagram.com OR site:x.com OR site:linkedin.com"]
-];
-$("dk-q").addEventListener("input",function(){
-  var q=this.value.trim();
-  var box=$("dorkbox");box.innerHTML="";
-  if(!q)return;
-  DORKS.forEach(function(it){
-    var label=it[0],site=it[1];
-    var d='"'+q+'" '+site;
-    var a=document.createElement("a");
-    a.href="https://www.google.com/search?q="+encodeURIComponent(d);
-    a.textContent=label;
-    a.target="_blank";
-    a.rel="noopener";
-    box.appendChild(a);
-  });
-});
 </script>
 </body>
 </html>
