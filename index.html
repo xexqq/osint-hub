@@ -283,7 +283,7 @@ document.addEventListener("click",function(ev){
 function bigDork(q){
  return '"'+q+'" (site:t.me OR site:vk.com OR site:instagram.com OR site:x.com OR site:pastebin.com OR site:linkedin.com)';
 }
-function rootURL(s){return s.replace(/^https?:\\/\\/,"").split("/")[0];}
+function rootURL(s){return s.replace(/^https?:\/\//,"").split("/")[0];}
 
 var VC={email:[
   "https://haveibeenpwned.com/account/{Q}",
@@ -330,7 +330,7 @@ function searchAll(){
    urls.push("https://gravatar.com/"+CryptoJS.MD5(raw.trim().toLowerCase()).toString()+".json");
  }
  (VC[type]||VC.all).forEach(function(t){
-   urls.push(t.replace(/\\{Q\\}/g, (type==="domain"||type==="ip"||type==="url") ? rootURL(raw) : enc));
+   urls.push(t.replace("{Q}", (type==="domain"||type==="ip"||type==="url") ? rootURL(raw) : enc));
  });
  urls.forEach(function(u){window.open(u,"_blank");});
  document.getElementById("dorkline").textContent=bigDork(raw);
