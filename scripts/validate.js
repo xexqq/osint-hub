@@ -17,10 +17,11 @@ scripts.forEach((m, i) => {
 const con = fs.readFileSync('app/src/main/assets/console.html', 'utf8');
 if (!con.includes('id="smart-go"')) throw new Error('console smart search missing');
 if (!con.includes('id="s-theme"')) throw new Error('console settings missing');
-const conScripts = [...con.matchAll(/<script>([\s\S]*?)<\/script>/g)];
-if (!conScripts.length) throw new Error('console script missing');
-fs.writeFileSync('/tmp/opencode/con_script.js', conScripts[conScripts.length - 1][1]);
-execSync('node --check /tmp/opencode/con_script.js', { stdio: 'inherit' });
+if (!con.includes('con-smart.js')) throw new Error('console script ref missing');
+['con-core.js', 'con-features.js', 'con-smart.js'].forEach(f => {
+  const p = 'app/src/main/assets/' + f;
+  execSync(`node --check ${p}`, { stdio: 'inherit' });
+});
 
 const manifest = fs.readFileSync('app/src/main/AndroidManifest.xml', 'utf8');
 if (!manifest.includes('INTERNET')) throw new Error('INTERNET permission missing');
