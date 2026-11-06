@@ -1,0 +1,53 @@
+name: Deploy OSINT Hub to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate
+        run: |
+          test -f index.html
+          node -e "
+            const fs=require('fs');
+            const html=fs.readFileSync('index.html','utf8');
+            if(!html.includes('OSINT')||!html.includes('id="+String.fromCharCode(34)+"q"+String.fromCharCode(34)+"')) throw new Error('hub broken');
+            const m=html.match(/<script>([\s\S]*?)<\/script>/);
+            new Function(m[1]);
+            console.log('build check OK');
+          "
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
