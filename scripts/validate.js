@@ -1,0 +1,10 @@
+const fs = require('fs');
+const html = fs.readFileSync('index.html', 'utf8');
+if (!html.includes('OSINT')) throw new Error('title missing');
+if (!html.includes('id="q"')) throw new Error('search input missing');
+const m = html.match(/<script>([\s\S]*?)<\/script>/);
+if (!m) throw new Error('script block missing');
+new Function(m[1]);
+const grids = (html.match(/class="grid"/g) || []).length;
+const cards = (html.match(/\{n:"/g) || []).length;
+console.log('build check OK — grids:', grids, 'tools:', cards);
