@@ -1,5 +1,7 @@
 const fs = require('fs');
 const { execSync } = require('child_process');
+const os = require('os');
+const TMP = os.tmpdir();
 
 const html = fs.readFileSync('index.html', 'utf8');
 if (!html.includes('OSINT')) throw new Error('title missing');
@@ -10,8 +12,8 @@ if (/СКЛЧАТЬ|нажimation|帮助|место|лемма-плейс/.test(
 const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
 if (scripts.length === 0) throw new Error('script block missing');
 scripts.forEach((m, i) => {
-  fs.writeFileSync(`/tmp/opencode/idx_script_${i}.js`, m[1]);
-  execSync(`node --check /tmp/opencode/idx_script_${i}.js`, { stdio: 'inherit' });
+  fs.writeFileSync(`${TMP}/idx_script_${i}.js`, m[1]);
+  execSync(`node --check ${TMP}/idx_script_${i}.js`, { stdio: 'inherit' });
 });
 
 const con = fs.readFileSync('app/src/main/assets/console.html', 'utf8');
