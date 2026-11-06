@@ -3,6 +3,9 @@ name: Deploy OSINT Hub to Pages
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "app/**"
+      - ".github/workflows/build-apk.yml"
   workflow_dispatch:
 
 permissions:
