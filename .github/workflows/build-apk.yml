@@ -35,20 +35,23 @@ jobs:
       - name: Stage APK
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk OSINT-Hub-debug.apk
-          ls -la OSINT-Hub-debug.apk
+          APP_VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle)
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+          cp app/build/outputs/apk/debug/app-debug.apk "OSINT-Hub-v$APP_VERSION.apk"
+          ls -la OSINT-Hub-v*.apk
 
-      - name: Publish to releases (v1.0.0)
+      - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create v1.0.0 OSINT-Hub-debug.apk \
-            --title "OSINT Hub APK v1.0.0" \
-            --notes "Android-консоль OSINT: DoH DNS-recon + брутфорс поддоменов, IP-интел (ipwho.is), GitHub-разведка, EXIF фото, разбор телефонов (libphonenumber), dork-конструктор. Установка: разрешить установку из неизвестных источников." \
-          || gh release upload v1.0.0 OSINT-Hub-debug.apk --clobber
+          TAG="v$APP_VERSION"
+          gh release create "$TAG" "OSINT-Hub-v$APP_VERSION.apk" \
+            --title "OSINT Hub $TAG" \
+            --notes "Мобильная OSINT-консоль: умный поиск с автоопределением типа, IP-интел + rDNS, DNS-рекон и брутфорс поддоменов, email/phone/GitHub/EXIF, dork-конструктор, настройки (тема, страна, списки), история, диагностика. Установка: разрешите установку из неизвестных источников." \
+          || gh release upload "$TAG" "OSINT-Hub-v$APP_VERSION.apk" --clobber
 
       - name: Upload CI artifact
         uses: actions/upload-artifact@v4
         with:
           name: OSINT-Hub-APK
-          path: OSINT-Hub-debug.apk
+          path: OSINT-Hub-v*.apk
